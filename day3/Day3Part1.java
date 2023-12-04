@@ -14,7 +14,7 @@ public class Day3Part1 {
     var input = Files.readString(Path.of("./day3/day3.txt"));
     ArrayList<ArrayList<String>> engineSchematic = new ArrayList<>();
     ArrayList<ArrayList<Integer>> symbolCoordinates = new ArrayList<ArrayList<Integer>>();
-    Set<Integer> partNumbers = new HashSet<>();
+    ArrayList<Integer> partNumbers = new ArrayList<>();
     Set<String> uniqueSymbols = new HashSet<>();
     Integer[][] directions = {
       {-1, -1},
@@ -40,18 +40,16 @@ public class Day3Part1 {
     });
 
     symbolCoordinates = processSymbolCoordinates(engineSchematic, uniqueSymbols);
-    partNumbers = findPartNumbers(symbolCoordinates, directions, engineSchematic);
+    partNumbers = findPartNumbers(symbolCoordinates, directions, engineSchematic, partNumbers);
 
     System.out.println(partNumbers.stream().collect(Collectors.summingInt(Integer::intValue)));
   }
 
-  private static HashSet<Integer> findPartNumbers(ArrayList<ArrayList<Integer>> symbolCoordinates,
-    Integer[][] directions, ArrayList<ArrayList<String>> engineSchematic) {
+  private static ArrayList<Integer> findPartNumbers(ArrayList<ArrayList<Integer>> symbolCoordinates,
+    Integer[][] directions, ArrayList<ArrayList<String>> engineSchematic, ArrayList<Integer> partNumbers) {
 
-
-    HashSet<Integer> partNumbers = new HashSet<>();
-
-    symbolCoordinates.forEach(coordinate -> {
+      symbolCoordinates.forEach(coordinate -> {
+      Set<Integer> partNumberMemo = new HashSet<>();
       Integer yCoordinate = coordinate.get(0);
       Integer xCoordinate = coordinate.get(1);
 
@@ -71,8 +69,12 @@ public class Day3Part1 {
         if (character.matches("\\d")) {
           if (yankPartNumber(xPoint, yPoint, engineSchematic) == null) continue;
 
-          partNumbers.add(yankPartNumber(xPoint, yPoint, engineSchematic));
+          partNumberMemo.add(yankPartNumber(xPoint, yPoint, engineSchematic));
         }
+      }
+
+      for (Integer partNumber : partNumberMemo) {
+        partNumbers.add(partNumber);
       }
     });
 
@@ -86,8 +88,6 @@ public class Day3Part1 {
 
     partNumberArray = seek("right", engineSchematic, xPoint, yPoint, partNumberArray);
     partNumberArray = seek("left", engineSchematic, xPoint, yPoint, partNumberArray);
-
-    if (partNumberArray.size() == 1) return null;
 
     return Integer.parseInt(String.join("", partNumberArray.stream().map(Object::toString).toArray(String[]::new)));
   }
