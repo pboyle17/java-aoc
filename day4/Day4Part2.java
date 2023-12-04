@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,21 +13,39 @@ import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Day4Part1 {
+public class Day4Part2 {
   public static void main(String[] args) throws IOException {
     String input = Files.readString(Path.of("./day4/day4.txt"));
-    ArrayList<Integer> totalPoints = new ArrayList<>();
+    ArrayList<Integer> matches = new ArrayList<>();
+    ArrayList<Integer> totalCardsArrayWithCopies = new ArrayList<>();
 
     input.lines().forEach(line -> {
       List<Integer> cardNumbers = getCardNumbers(line);
       List<Integer> winningNumbers = getWinningNumbers(line);
       ArrayList<Integer> matchingNumbers = getMatchingNumbers(cardNumbers, winningNumbers);
-      Integer cardScore = getCardPoints(matchingNumbers);
 
-      totalPoints.add(cardScore);
+      matches.add(matchingNumbers.size());
     });
 
-    System.out.println(totalPoints.stream().collect(Collectors.summingInt(Integer::intValue)));
+    int index = 0;
+    for (Integer match: matches) {
+      int cardId = index + 1;
+
+      totalCardsArrayWithCopies.add(cardId);
+
+      for (int i = 1; i <= match; i++) {
+        for(int j = 1; j <= Collections.frequency(totalCardsArrayWithCopies, cardId); j++) {
+          totalCardsArrayWithCopies.add(cardId + i);
+          System.out.println(String.format("Got copy of Card %s", cardId + i));
+        }
+      }
+
+      index++;
+    }
+
+    System.out.println(Arrays.toString(totalCardsArrayWithCopies.toArray()));
+    System.out.println(Arrays.toString(matches.toArray()));
+    System.out.println(totalCardsArrayWithCopies.size());
   }
 
 
@@ -36,12 +56,6 @@ public class Day4Part1 {
     winningNumbersSet.retainAll(cardNumbersSet);
 
     return new ArrayList<Integer>(winningNumbersSet);
-  }
-
-  private static Integer getCardPoints(ArrayList<Integer> matchingNumbers) {
-    if (matchingNumbers.size() == 0) return 0;
-
-    return (int) Math.pow(2, matchingNumbers.size() - 1);
   }
 
   private static List<Integer> getWinningNumbers(String line) {
