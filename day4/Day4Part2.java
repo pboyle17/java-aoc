@@ -6,8 +6,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
@@ -17,7 +19,7 @@ public class Day4Part2 {
   public static void main(String[] args) throws IOException {
     String input = Files.readString(Path.of("./day4/day4.txt"));
     ArrayList<Integer> matches = new ArrayList<>();
-    ArrayList<Integer> totalCardsArrayWithCopies = new ArrayList<>();
+    Map<Integer, Integer> totalCardsArrayWithCopies = new HashMap<Integer, Integer>();
 
     input.lines().forEach(line -> {
       List<Integer> cardNumbers = getCardNumbers(line);
@@ -26,26 +28,34 @@ public class Day4Part2 {
 
       matches.add(matchingNumbers.size());
     });
+    System.out.println(Arrays.toString(matches.toArray()));
 
     int index = 0;
     for (Integer match: matches) {
       int cardId = index + 1;
 
-      totalCardsArrayWithCopies.add(cardId);
+      if (!totalCardsArrayWithCopies.containsKey(cardId)) {
+        totalCardsArrayWithCopies.put(cardId, 1);
+      } else {
+        int val = totalCardsArrayWithCopies.get(cardId);
+        totalCardsArrayWithCopies.put(cardId, val + 1);
+      }
 
-      for (int i = 1; i <= match; i++) {
-        for(int j = 1; j <= Collections.frequency(totalCardsArrayWithCopies, cardId); j++) {
-          totalCardsArrayWithCopies.add(cardId + i);
-          System.out.println(String.format("Got copy of Card %s", cardId + i));
+      int freq = totalCardsArrayWithCopies.get(cardId);
+
+      for (int i = 1; i <= freq; i++) {
+        for (int j = 1; j <= match; j++) {
+          int value = totalCardsArrayWithCopies.containsKey(cardId + j) ? totalCardsArrayWithCopies.get(cardId + j) : 0;
+          totalCardsArrayWithCopies.put(cardId + j, value + 1);
+          // System.out.println(String.format("Got copy of Card %s, index %s", cardId + j, index));
+          // System.out.println(String.format("key: %s value: %s", cardId+j, totalCardsArrayWithCopies.get(cardId+j)));
         }
       }
 
       index++;
     }
 
-    System.out.println(Arrays.toString(totalCardsArrayWithCopies.toArray()));
-    System.out.println(Arrays.toString(matches.toArray()));
-    System.out.println(totalCardsArrayWithCopies.size());
+    System.out.println(totalCardsArrayWithCopies.values().stream().mapToInt(Integer::intValue).sum());
   }
 
 
